@@ -4,30 +4,49 @@ def identity(numRows, numCols, val=1, rowStart=0):
     return [[(val if i == j else 0) for j in range(numCols)]
             for i in range(rowStart, numRows)]
 
-def standardForm(cost, greaterThans=[], gtThreshold=[], lessThans=[], ltThreshold=[], equalities=[], eqThreshold=[], maximization=True):
+def standardForm(cost, greaterThans=None,
+                 gtThreshold=None, lessThan=None, ltThreshold=None,
+                 equalities=None, eqThreshold=None, maximization=True):
+    if eqThreshold is None:
+        eqThreshold = []
+    if equalities is None:
+        equalities = []
+    if ltThreshold is None:
+        ltThreshold = []
+    if lessThan is None:
+        lessThan = []
+    if gtThreshold is None:
+        gtThreshold = []
+    if greaterThans is None:
+        greaterThans = []
+
     newVars = 0
     numRows = 0
-    if gtThreshold != []:
+
+    if gtThreshold:
         newVars += len(gtThreshold)
         numRows += len(gtThreshold)
-    if ltThreshold != []:
+    if ltThreshold:
         newVars += len(ltThreshold)
         numRows += len(ltThreshold)
-    if eqThreshold != []:
+    if eqThreshold:
         numRows += len(eqThreshold)
     if not maximization:
         cost = [-x for x in cost]
     if newVars == 0:
         return cost, equalities, eqThreshold
+
     newCost = list(cost) + [0] * newVars
     constraints = []
     threshold = []
-    oldConstraints = [(greaterThans, gtThreshold, -1), (lessThans, ltThreshold, 1), (equalities, eqThreshold, 0)]
+    oldConstraints = [(greaterThans, gtThreshold, -1), (lessThan, ltThreshold, 1), (equalities, eqThreshold, 0)]
     offset = 0
+
     for constraintList, oldThreshold, coefficient in oldConstraints:
         constraints += [c + r for c, r in zip(constraintList, identity(numRows, newVars, coefficient, offset))]
         threshold += oldThreshold
         offset += len(oldThreshold)
+
     return newCost, constraints, threshold
 
 def dot(a, b):
