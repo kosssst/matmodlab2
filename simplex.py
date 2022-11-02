@@ -1,12 +1,23 @@
 import heapq
 
-def identity(numRows, numCols, val=1, rowStart=0):
+def ToKanonView(c: list, A: list, b: list, sign: list) -> None:
+    for i, s in enumerate(sign):
+        if s == -1:
+            c.append(0)
+            for k in range(len(sign)):
+                if k == i:
+                    A[i].append(1)
+                else:
+                    A[i].append(0)
+            
+
+def identity(numRows: int, numCols: int, val=1, rowStart=0) -> list:
     return [[(val if i == j else 0) for j in range(numCols)]
             for i in range(rowStart, numRows)]
 
 def standardForm(cost, greaterThan=None,
                  gtThreshold=None, lessThan=None, ltThreshold=None,
-                 equalities=None, eqThreshold=None, maximization=True):
+                 equalities=None, eqThreshold=None, maximization=True) -> tuple[list, list, list]:
     if eqThreshold is None:
         eqThreshold = []
     if equalities is None:
@@ -49,48 +60,45 @@ def standardForm(cost, greaterThan=None,
 
     return newCost, constraints, threshold
 
-def dot(a, b):
-    return sum(x * y for x, y in zip(a, b))
-
-def column(A, j):
+def column(A: list, j: int) -> list:
     return [row[j] for row in A]
 
-def transpose(A):
+def transpose(A: list) -> list:
     return [column(A, j) for j in range(len(A[0]))]
 
-def isPivotCol(col):
+def isPivotCol(col: list) -> bool:
     return (len([c for c in col if c == 0]) == len(col) - 1) and sum(col) == 1
 
-def variableValueForPivotColumn(tableau, column):
+def variableValueForPivotColumn(tableau: list, column: int):
     pivotRow = [i for (i, x) in enumerate(column) if x == 1][0]
     return tableau[pivotRow][-1]
 
-def initialTableau(c, A, b):
+def initialTableau(c: list, A: list, b: list) -> list:
     tableau = [row[:] + [x] for row, x in zip(A, b)]
     tableau.append([ci for ci in c] + [0])
     return tableau
 
-def primalSolution(tableau):
+def primalSolution(tableau: list) -> list:
     columns = transpose(tableau)
     indices = [j for j, col in enumerate(columns[:-1]) if isPivotCol(col)]
     return [(colIndex, variableValueForPivotColumn(tableau, columns[colIndex]))
             for colIndex in indices]
 
-def objectiveValue(tableau):
+def objectiveValue(tableau: list) -> int:
     return -(tableau[-1][-1])
 
 
-def canImprove(tableau):
+def canImprove(tableau: list) -> bool:
     lastRow = tableau[-1]
     return any(x > 0 for x in lastRow[:-1])
 
-def moreThanOneMin(L):
+def moreThanOneMin(L: list) -> bool:
     if len(L) <= 1:
         return False
     x, y = heapq.nsmallest(2, L, key=lambda x: x[1])
     return x == y
 
-def findPivotIndex(tableau):
+def findPivotIndex(tableau: list) -> tuple[int, int]:
     column_choices = [(i, x) for (i, x) in enumerate(tableau[-1][:-1]) if x > 0]
     column = min(column_choices, key=lambda a: a[1])[0]
     if all(row[column] <= 0 for row in tableau):
@@ -102,7 +110,7 @@ def findPivotIndex(tableau):
     row = min(quotients, key=lambda x: x[1])[0]
     return row, column
 
-def pivotAbout(tableau, pivot):
+def pivotAbout(tableau: list, pivot: int) -> None:
     i, j = pivot
     pivotDenom = tableau[i][j]
     tableau[i] = [x / pivotDenom for x in tableau[i]]
@@ -111,7 +119,8 @@ def pivotAbout(tableau, pivot):
             pivotRowMultiple = [y * tableau[k][j] for y in tableau[i]]
             tableau[k] = [x - y for x, y in zip(tableau[k], pivotRowMultiple)]
 
-def simplex(c, A, b):
+def simplex(c: list, A: list, b: list, sign: list) -> tuple[list, list, int]:
+    ToKanonView(c, A, b, sign)
     tableau = initialTableau(c, A, b)
     print("Initial tableau:")
     for row in tableau:
