@@ -9,56 +9,6 @@ def ToKanonView(c: list, A: list, b: list, sign: list) -> None:
                     A[i].append(1)
                 else:
                     A[i].append(0)
-            
-
-def identity(numRows: int, numCols: int, val=1, rowStart=0) -> list:
-    return [[(val if i == j else 0) for j in range(numCols)]
-            for i in range(rowStart, numRows)]
-
-def standardForm(cost, greaterThan=None,
-                 gtThreshold=None, lessThan=None, ltThreshold=None,
-                 equalities=None, eqThreshold=None, maximization=True) -> tuple[list, list, list]:
-    if eqThreshold is None:
-        eqThreshold = []
-    if equalities is None:
-        equalities = []
-    if ltThreshold is None:
-        ltThreshold = []
-    if lessThan is None:
-        lessThan = []
-    if gtThreshold is None:
-        gtThreshold = []
-    if greaterThan is None:
-        greaterThan = []
-
-    newVars = 0
-    numRows = 0
-
-    if gtThreshold:
-        newVars += len(gtThreshold)
-        numRows += len(gtThreshold)
-    if ltThreshold:
-        newVars += len(ltThreshold)
-        numRows += len(ltThreshold)
-    if eqThreshold:
-        numRows += len(eqThreshold)
-    if not maximization:
-        cost = [-x for x in cost]
-    if newVars == 0:
-        return cost, equalities, eqThreshold
-
-    newCost = list(cost) + [0] * newVars
-    constraints = []
-    threshold = []
-    oldConstraints = [(greaterThan, gtThreshold, -1), (lessThan, ltThreshold, 1), (equalities, eqThreshold, 0)]
-    offset = 0
-
-    for constraintList, oldThreshold, coefficient in oldConstraints:
-        constraints += [c + r for c, r in zip(constraintList, identity(numRows, newVars, coefficient, offset))]
-        threshold += oldThreshold
-        offset += len(oldThreshold)
-
-    return newCost, constraints, threshold
 
 def column(A: list, j: int) -> list:
     return [row[j] for row in A]
